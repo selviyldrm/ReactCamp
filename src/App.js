@@ -3,6 +3,14 @@ import CategoryList from "./CategoryList";
 import Navi from "./Navi";
 import ProductList from "./ProductList";
 import { Container, Row, Col } from 'reactstrap'
+import alertify from 'alertifyjs';
+import {Switch , Route } from 'react-router-dom';
+import CartList from './CartList';
+import NotFound from './NotFound';
+import FormDemo1 from './FormDemo1';
+import FormDemo2 from './FormDemo2';
+
+
 
 export default class App extends Component{
   state={currentCategory:"",products:[],cart:[]}
@@ -34,7 +42,13 @@ export default class App extends Component{
    else{
      newCart.push({product:product,quantity:1});
    }
-   this.setState({cart:newCart})
+   this.setState({cart:newCart});
+   alertify.success(product.productName + "added to cart!")
+  }
+  removeFromCart=product=>{
+    let newCart=this.state.cart.filter(c=>c.product.id!==product.id)
+    this.setState({cart:newCart})
+    alertify.error(product.productName + "removed from cart!")
   }
   render(){
     let categoryInfo={title:"Category Liste"};
@@ -42,7 +56,7 @@ export default class App extends Component{
      return (
   <div >
        <Container>
-         <Navi cart={this.state.cart}/>
+         <Navi removeFromCart={this.removeFromCart} cart={this.state.cart}/>
        <Row>
         <Col xs="3">
            <CategoryList
@@ -52,11 +66,29 @@ export default class App extends Component{
          </Col>
 
          <Col xs="9"> 
-         <ProductList
-          products={this.state.products} 
+       <Switch>
+        <Route exact path="/" render={props=>(
+          <ProductList 
+          {...props}
+          products={this.state.products}
           addToCart={this.addToCart}
           currentCategory={this.state.currentCategory}
-          info={productInfo}/>
+          info={productInfo}
+          />
+        )
+        } />
+        <Route exact path="/cart" render={props=>(
+          <CartList 
+          {...props}
+          cart={this.state.cart}
+          removeFromCart={this.removeFromCart}
+          />
+        )
+        }/>
+        <Route path="/form1"component={FormDemo1} />
+        <Route path="/form2"component={FormDemo2} />
+        <Route exact component={NotFound}/>
+       </Switch>
           </Col>
         </Row>
       </Container>
